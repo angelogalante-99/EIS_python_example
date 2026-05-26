@@ -1,0 +1,10 @@
+{
+    "TaskName": "First Day Of My Life",
+    "TaskDescription": "Lastfm_tag: love, Artist: Bright Eyes, Highlight_start: 6, Num_ratings: 14, VAQ_Estimate: 2, VAQ_Online: 2, AVG_Valence: 6.5714, STD_Valence: 1.3997, Q1_Valence: 1.9167, Q2_Valence: 7.0, Q3_Valence: 8.0, AVG_Arousal: 4.2143, STD_Arousal: 2.5122, Q1_Arousal: 1.9167, Q2_Arousal: 4.0, Q3_Arousal: 6.0833, AVG_Dominance: 5.4286, STD_Dominance: 2.0603, Q1_Dominance: 4.8333, Q2_Dominance: 5.0, Q3_Dominance: 7.0",
+    "Manufacturer": "Muse",
+    "SamplingFrequency": 256,
+    "EEGChannelCount": 4,
+    "EEGReference": "n/a",
+    "PowerLineFrequency": 50,
+    "SoftwareFilters": "n/a"
+}

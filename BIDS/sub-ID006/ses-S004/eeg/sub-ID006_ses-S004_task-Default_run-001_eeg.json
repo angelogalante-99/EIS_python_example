@@ -1,0 +1,10 @@
+{
+    "TaskName": "Blame It On The Boogie",
+    "TaskDescription": "Lastfm_tag: joy, Artist: Jackson 5, Highlight_start: 21, Num_ratings: 15, VAQ_Estimate: 1, VAQ_Online: 1, AVG_Valence: 6.9333, STD_Valence: 2.3228, Q1_Valence: 6.0, Q2_Valence: 7.0, Q3_Valence: 9.0, AVG_Arousal: 6.4667, STD_Arousal: 1.9276, Q1_Arousal: 6.0, Q2_Arousal: 7.0, Q3_Arousal: 7.0, AVG_Dominance: 5.8, STD_Dominance: 2.0067, Q1_Dominance: 5.0, Q2_Dominance: 7.0, Q3_Dominance: 7.0",
+    "Manufacturer": "Muse",
+    "SamplingFrequency": 256,
+    "EEGChannelCount": 4,
+    "EEGReference": "n/a",
+    "PowerLineFrequency": 50,
+    "SoftwareFilters": "n/a"
+}

@@ -1,0 +1,10 @@
+{
+    "TaskName": "Carving A Giant",
+    "TaskDescription": "Lastfm_tag: nan, Artist: Gorgoroth , Highlight_start: 166, Num_ratings: 15, VAQ_Estimate: 4, VAQ_Online: 4, AVG_Valence: 3.2667, STD_Valence: 2.1124, Q1_Valence: 4.1667, Q2_Valence: 3.0, Q3_Valence: 4.0, AVG_Arousal: 5.3333, STD_Arousal: 2241.0, Q1_Arousal: 4.1667, Q2_Arousal: 6.0, Q3_Arousal: 7.0, AVG_Dominance: 5.6667, STD_Dominance: 2.4129, Q1_Dominance: 3.3333, Q2_Dominance: 6.0, Q3_Dominance: 7.8333",
+    "Manufacturer": "Muse",
+    "SamplingFrequency": 256,
+    "EEGChannelCount": 4,
+    "EEGReference": "n/a",
+    "PowerLineFrequency": 50,
+    "SoftwareFilters": "n/a"
+}

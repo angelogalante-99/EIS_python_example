@@ -1,0 +1,10 @@
+{
+    "TaskName": "My Funeral ",
+    "TaskDescription": "Lastfm_tag: nan, Artist: Dark Funeral , Highlight_start: 251, Num_ratings: 15, VAQ_Estimate: 4, VAQ_Online: 4, AVG_Valence: 3.4667, STD_Valence: 2.3343, Q1_Valence: 3.1667, Q2_Valence: 3.0, Q3_Valence: 4.8333, AVG_Arousal: 5.3333, STD_Arousal: 2.3851, Q1_Arousal: 3.1667, Q2_Arousal: 6.0, Q3_Arousal: 7.0, AVG_Dominance: 5.2667, STD_Dominance: 2.8628, Q1_Dominance: 2.1667, Q2_Dominance: 5.0, Q3_Dominance: 8.0",
+    "Manufacturer": "Muse",
+    "SamplingFrequency": 256,
+    "EEGChannelCount": 4,
+    "EEGReference": "n/a",
+    "PowerLineFrequency": 50,
+    "SoftwareFilters": "n/a"
+}

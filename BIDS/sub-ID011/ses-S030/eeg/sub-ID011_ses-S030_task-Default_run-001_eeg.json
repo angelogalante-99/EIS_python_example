@@ -1,0 +1,10 @@
+{
+    "TaskName": "Hurt",
+    "TaskDescription": "Lastfm_tag: nan, Artist: Christina Aguilera , Highlight_start: 181, Num_ratings: 16, VAQ_Estimate: 3, VAQ_Online: 3, AVG_Valence: 3.4375, STD_Valence: 1.3214, Q1_Valence: 2.0, Q2_Valence: 3.5, Q3_Valence: 4.0, AVG_Arousal: 3.625, STD_Arousal: 1.8329, Q1_Arousal: 2.0, Q2_Arousal: 3.5, Q3_Arousal: 5.5833, AVG_Dominance: 3.9375, STD_Dominance: 2304.0, Q1_Dominance: 2.4167, Q2_Dominance: 3.5, Q3_Dominance: 5.5833",
+    "Manufacturer": "Muse",
+    "SamplingFrequency": 256,
+    "EEGChannelCount": 4,
+    "EEGReference": "n/a",
+    "PowerLineFrequency": 50,
+    "SoftwareFilters": "n/a"
+}

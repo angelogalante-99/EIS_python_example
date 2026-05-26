@@ -1,0 +1,10 @@
+{
+    "TaskName": "First Date",
+    "TaskDescription": "Lastfm_tag: nan, Artist: Blink 182, Highlight_start: 51, Num_ratings: 15, VAQ_Estimate: 1, VAQ_Online: 1, AVG_Valence: 6.1333, STD_Valence: 1.4996, Q1_Valence: 5.1667, Q2_Valence: 6.0, Q3_Valence: 7.0, AVG_Arousal: 6.2, STD_Arousal: 1.6, Q1_Arousal: 5.1667, Q2_Arousal: 6.0, Q3_Arousal: 7.0, AVG_Dominance: 5.6, STD_Dominance: 1.9596, Q1_Dominance: 5.0, Q2_Dominance: 5.0, Q3_Dominance: 7.0",
+    "Manufacturer": "Muse",
+    "SamplingFrequency": 256,
+    "EEGChannelCount": 4,
+    "EEGReference": "n/a",
+    "PowerLineFrequency": 50,
+    "SoftwareFilters": "n/a"
+}

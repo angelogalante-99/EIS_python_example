@@ -1,0 +1,10 @@
+{
+    "TaskName": "May It Be (Saving Private Ryan)",
+    "TaskDescription": "Lastfm_tag: nan, Artist: Enya , Highlight_start: 86, Num_ratings: 15, VAQ_Estimate: 3, VAQ_Online: 3, AVG_Valence: 3.2, STD_Valence: 1.7588, Q1_Valence: 2.0, Q2_Valence: 3.0, Q3_Valence: 4.0, AVG_Arousal: 3.667, STD_Arousal: 1.8856, Q1_Arousal: 2.0, Q2_Arousal: 3.0, Q3_Arousal: 4.8333, AVG_Dominance: 3.2667, STD_Dominance: 1.8785, Q1_Dominance: 2.0, Q2_Dominance: 3.0, Q3_Dominance: 4.0",
+    "Manufacturer": "Muse",
+    "SamplingFrequency": 256,
+    "EEGChannelCount": 4,
+    "EEGReference": "n/a",
+    "PowerLineFrequency": 50,
+    "SoftwareFilters": "n/a"
+}

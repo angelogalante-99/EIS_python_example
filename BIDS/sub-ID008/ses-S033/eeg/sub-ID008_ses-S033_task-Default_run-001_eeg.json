@@ -1,0 +1,10 @@
+{
+    "TaskName": "Gloomy Sunday",
+    "TaskDescription": "Lastfm_tag: nan, Artist: Diamanda Galas, Highlight_start: 41, Num_ratings: 14, VAQ_Estimate: 4, VAQ_Online: 3, AVG_Valence: 4.1429, STD_Valence: 1807.0, Q1_Valence: 3.0, Q2_Valence: 4.0, Q3_Valence: 5.0, AVG_Arousal: 4.2143, STD_Arousal: 1.5203, Q1_Arousal: 3.0, Q2_Arousal: 4.5, Q3_Arousal: 5.0833, AVG_Dominance: 4.0, STD_Dominance: 1.8127, Q1_Dominance: 2.9167, Q2_Dominance: 4.5, Q3_Dominance: 5.0833",
+    "Manufacturer": "Muse",
+    "SamplingFrequency": 256,
+    "EEGChannelCount": 4,
+    "EEGReference": "n/a",
+    "PowerLineFrequency": 50,
+    "SoftwareFilters": "n/a"
+}

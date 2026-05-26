@@ -1,0 +1,10 @@
+{
+    "TaskName": "Scotty Doesn't Know",
+    "TaskDescription": "Lastfm_tag: exciting, Artist: Lustra, Highlight_start: 141, Num_ratings: 14, VAQ_Estimate: 1, VAQ_Online: 1, AVG_Valence: 5.9286, STD_Valence: 2.0516, Q1_Valence: 6.0, Q2_Valence: 6.0, Q3_Valence: 7.1667, AVG_Arousal: 6.9286, STD_Arousal: 1.9808, Q1_Arousal: 6.0, Q2_Arousal: 7.5, Q3_Arousal: 8.0, AVG_Dominance: 5.5, STD_Dominance: 2.4128, Q1_Dominance: 3.9167, Q2_Dominance: 6.0, Q3_Dominance: 7.0833",
+    "Manufacturer": "Muse",
+    "SamplingFrequency": 256,
+    "EEGChannelCount": 4,
+    "EEGReference": "n/a",
+    "PowerLineFrequency": 50,
+    "SoftwareFilters": "n/a"
+}

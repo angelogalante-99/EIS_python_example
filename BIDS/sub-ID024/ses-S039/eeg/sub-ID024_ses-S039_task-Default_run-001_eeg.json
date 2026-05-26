@@ -1,0 +1,10 @@
+{
+    "TaskName": "Bombtrack",
+    "TaskDescription": "Lastfm_tag: nan, Artist: Rage Against The Machine, Highlight_start: 6, Num_ratings: 15, VAQ_Estimate: 4, VAQ_Online: 1, AVG_Valence: 5.8667, STD_Valence: 2.1868, Q1_Valence: 6.0, Q2_Valence: 6.0, Q3_Valence: 8.5, AVG_Arousal: 7.0667, STD_Arousal: 1436.0, Q1_Arousal: 6.0, Q2_Arousal: 7.0, Q3_Arousal: 8.0, AVG_Dominance: 7.0667, STD_Dominance: 1.6111, Q1_Dominance: 6.0, Q2_Dominance: 7.0, Q3_Dominance: 9.0",
+    "Manufacturer": "Muse",
+    "SamplingFrequency": 256,
+    "EEGChannelCount": 4,
+    "EEGReference": "n/a",
+    "PowerLineFrequency": 50,
+    "SoftwareFilters": "n/a"
+}

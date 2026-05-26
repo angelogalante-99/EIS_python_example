@@ -1,0 +1,10 @@
+{
+    "TaskName": "Fuck You",
+    "TaskDescription": "Lastfm_tag: nan, Artist: Lily Allen , Highlight_start: 6, Num_ratings: 15, VAQ_Estimate: 2, VAQ_Online: 1, AVG_Valence: 7.2667, STD_Valence: 1.34, Q1_Valence: 5.0, Q2_Valence: 7.0, Q3_Valence: 8.8333, AVG_Arousal: 6.0667, STD_Arousal: 1.7689, Q1_Arousal: 5.0, Q2_Arousal: 6.0, Q3_Arousal: 7.0, AVG_Dominance: 6.6667, STD_Dominance: 1.6193, Q1_Dominance: 6.0, Q2_Dominance: 6.0, Q3_Dominance: 8.0",
+    "Manufacturer": "Muse",
+    "SamplingFrequency": 256,
+    "EEGChannelCount": 4,
+    "EEGReference": "n/a",
+    "PowerLineFrequency": 50,
+    "SoftwareFilters": "n/a"
+}

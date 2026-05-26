@@ -1,0 +1,10 @@
+{
+    "TaskName": "Bastard Set Of Dreams",
+    "TaskDescription": "Lastfm_tag: hate, Artist: Dead To Fall, Highlight_start: 126, Num_ratings: 15, VAQ_Estimate: 4, VAQ_Online: 4, AVG_Valence: 3.9333, STD_Valence: 2.0483, Q1_Valence: 4.1667, Q2_Valence: 3.0, Q3_Valence: 5.8333, AVG_Arousal: 6.1333, STD_Arousal: 2.0934, Q1_Arousal: 4.1667, Q2_Arousal: 6.0, Q3_Arousal: 8.0, AVG_Dominance: 5.5333, STD_Dominance: 1.8927, Q1_Dominance: 3.3333, Q2_Dominance: 6.0, Q3_Dominance: 7.0",
+    "Manufacturer": "Muse",
+    "SamplingFrequency": 256,
+    "EEGChannelCount": 4,
+    "EEGReference": "n/a",
+    "PowerLineFrequency": 50,
+    "SoftwareFilters": "n/a"
+}

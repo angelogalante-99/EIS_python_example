@@ -1,0 +1,10 @@
+{
+    "TaskName": "Butterfly Nets",
+    "TaskDescription": "Lastfm_tag: lovely, Artist: Bishop Allen, Highlight_start: 6, Num_ratings: 15, VAQ_Estimate: 2, VAQ_Online: 2, AVG_Valence: 6.4667, STD_Valence: 1.3597, Q1_Valence: 2.1667, Q2_Valence: 7.0, Q3_Valence: 7.8333, AVG_Arousal: 4.0, STD_Arousal: 1.7889, Q1_Arousal: 2.1667, Q2_Arousal: 4.0, Q3_Arousal: 6.0, AVG_Dominance: 4.9333, STD_Dominance: 1.9137, Q1_Dominance: 4.0, Q2_Dominance: 5.0, Q3_Dominance: 6.0",
+    "Manufacturer": "Muse",
+    "SamplingFrequency": 256,
+    "EEGChannelCount": 4,
+    "EEGReference": "n/a",
+    "PowerLineFrequency": 50,
+    "SoftwareFilters": "n/a"
+}

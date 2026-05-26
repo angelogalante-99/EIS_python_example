@@ -1,0 +1,10 @@
+{
+    "TaskName": "A Hardcore State Of Mind",
+    "TaskDescription": "Lastfm_tag: nan, Artist: Dj Paul Elstak, Highlight_start: 131, Num_ratings: 14, VAQ_Estimate: 4, VAQ_Online: 4, AVG_Valence: 4.7857, STD_Valence: 1.9339, Q1_Valence: 5.9167, Q2_Valence: 5.0, Q3_Valence: 6.0833, AVG_Arousal: 6.3571, STD_Arousal: 1.9496, Q1_Arousal: 5.9167, Q2_Arousal: 7.0, Q3_Arousal: 8.0, AVG_Dominance: 4.9286, STD_Dominance: 2.1865, Q1_Dominance: 3.9167, Q2_Dominance: 4.5, Q3_Dominance: 7.0",
+    "Manufacturer": "Muse",
+    "SamplingFrequency": 256,
+    "EEGChannelCount": 4,
+    "EEGReference": "n/a",
+    "PowerLineFrequency": 50,
+    "SoftwareFilters": "n/a"
+}

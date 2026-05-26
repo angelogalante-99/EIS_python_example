@@ -1,0 +1,10 @@
+{
+    "TaskName": "Love Story",
+    "TaskDescription": "Lastfm_tag: nan, Artist: Taylor Swift , Highlight_start: 151, Num_ratings: 15, VAQ_Estimate: 2, VAQ_Online: 2, AVG_Valence: 6.2667, STD_Valence: 1.1813, Q1_Valence: 3.0, Q2_Valence: 6.0, Q3_Valence: 6.8333, AVG_Arousal: 4.1333, STD_Arousal: 1.7075, Q1_Arousal: 3.0, Q2_Arousal: 5.0, Q3_Arousal: 5.8333, AVG_Dominance: 4.6667, STD_Dominance: 1.7764, Q1_Dominance: 3.0, Q2_Dominance: 5.0, Q3_Dominance: 6.0",
+    "Manufacturer": "Muse",
+    "SamplingFrequency": 256,
+    "EEGChannelCount": 4,
+    "EEGReference": "n/a",
+    "PowerLineFrequency": 50,
+    "SoftwareFilters": "n/a"
+}

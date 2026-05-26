@@ -1,0 +1,10 @@
+{
+    "TaskName": "Moon Safari",
+    "TaskDescription": "Lastfm_tag: nan, Artist: Air, Highlight_start: 211, Num_ratings: 15, VAQ_Estimate: 2, VAQ_Online: 2, AVG_Valence: 6.0667, STD_Valence: 1.6111, Q1_Valence: 2.0, Q2_Valence: 6.0, Q3_Valence: 7.0, AVG_Arousal: 3.0, STD_Arousal: 1.5055, Q1_Arousal: 2.0, Q2_Arousal: 3.0, Q3_Arousal: 3.8333, AVG_Dominance: 4.8, STD_Dominance: 2.1354, Q1_Dominance: 3.1667, Q2_Dominance: 5.0, Q3_Dominance: 6.6667",
+    "Manufacturer": "Muse",
+    "SamplingFrequency": 256,
+    "EEGChannelCount": 4,
+    "EEGReference": "n/a",
+    "PowerLineFrequency": 50,
+    "SoftwareFilters": "n/a"
+}

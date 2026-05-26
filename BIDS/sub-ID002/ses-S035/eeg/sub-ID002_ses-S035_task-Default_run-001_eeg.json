@@ -1,0 +1,10 @@
+{
+    "TaskName": "Refuse Resist",
+    "TaskDescription": "Lastfm_tag: nan, Artist: Sepultura , Highlight_start: 6, Num_ratings: 15, VAQ_Estimate: 4, VAQ_Online: 4, AVG_Valence: 4.9333, STD_Valence: 2294.0, Q1_Valence: 7.0, Q2_Valence: 5.0, Q3_Valence: 6.8333, AVG_Arousal: 7.2667, STD_Arousal: 1.34, Q1_Arousal: 7.0, Q2_Arousal: 7.0, Q3_Arousal: 8.0, AVG_Dominance: 7.0667, STD_Dominance: 2.0806, Q1_Dominance: 5.1667, Q2_Dominance: 8.0, Q3_Dominance: 9.0",
+    "Manufacturer": "Muse",
+    "SamplingFrequency": 256,
+    "EEGChannelCount": 4,
+    "EEGReference": "n/a",
+    "PowerLineFrequency": 50,
+    "SoftwareFilters": "n/a"
+}

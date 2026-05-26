@@ -1,0 +1,10 @@
+{
+    "TaskName": "Song 2",
+    "TaskDescription": "Lastfm_tag: nan, Artist: Blur , Highlight_start: 6, Num_ratings: 15, VAQ_Estimate: 1, VAQ_Online: 1, AVG_Valence: 7.2, STD_Valence: 1.7588, Q1_Valence: 7.0, Q2_Valence: 7.0, Q3_Valence: 9.0, AVG_Arousal: 7.3333, STD_Arousal: 1.5776, Q1_Arousal: 7.0, Q2_Arousal: 7.0, Q3_Arousal: 9.0, AVG_Dominance: 6.5333, STD_Dominance: 2.0613, Q1_Dominance: 5.1667, Q2_Dominance: 7.0, Q3_Dominance: 8.6667",
+    "Manufacturer": "Muse",
+    "SamplingFrequency": 256,
+    "EEGChannelCount": 4,
+    "EEGReference": "n/a",
+    "PowerLineFrequency": 50,
+    "SoftwareFilters": "n/a"
+}

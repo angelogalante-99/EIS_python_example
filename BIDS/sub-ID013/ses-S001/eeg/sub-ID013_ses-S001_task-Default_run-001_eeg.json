@@ -1,0 +1,10 @@
+{
+    "TaskName": "Jungle Drum",
+    "TaskDescription": "Lastfm_tag: fun, Artist: Emil\u00edana Torrini, Highlight_start: 81, Num_ratings: 14, VAQ_Estimate: 1, VAQ_Online: 1, AVG_Valence: 6.8571, STD_Valence: 1.3015, Q1_Valence: 4.0, Q2_Valence: 6.5, Q3_Valence: 8.0, AVG_Arousal: 5.8571, STD_Arousal: 2.1993, Q1_Arousal: 4.0, Q2_Arousal: 7.0, Q3_Arousal: 7.0, AVG_Dominance: 6.0, STD_Dominance: 1.5584, Q1_Dominance: 5.0, Q2_Dominance: 6.0, Q3_Dominance: 7.0",
+    "Manufacturer": "Muse",
+    "SamplingFrequency": 256,
+    "EEGChannelCount": 4,
+    "EEGReference": "n/a",
+    "PowerLineFrequency": 50,
+    "SoftwareFilters": "n/a"
+}

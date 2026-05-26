@@ -1,0 +1,10 @@
+{
+    "TaskName": "Miniature Birds",
+    "TaskDescription": "Lastfm_tag: cheerful, Artist: Grand Archives, Highlight_start: 151, Num_ratings: 14, VAQ_Estimate: 2, VAQ_Online: 2, AVG_Valence: 5.9286, STD_Valence: 1.7914, Q1_Valence: 2.0, Q2_Valence: 6.0, Q3_Valence: 7.0, AVG_Arousal: 3.3571, STD_Arousal: 1342.0, Q1_Arousal: 2.0, Q2_Arousal: 3.0, Q3_Arousal: 4.0833, AVG_Dominance: 4.9286, STD_Dominance: 1.7914, Q1_Dominance: 4.8333, Q2_Dominance: 5.0, Q3_Dominance: 5.0833",
+    "Manufacturer": "Muse",
+    "SamplingFrequency": 256,
+    "EEGChannelCount": 4,
+    "EEGReference": "n/a",
+    "PowerLineFrequency": 50,
+    "SoftwareFilters": "n/a"
+}

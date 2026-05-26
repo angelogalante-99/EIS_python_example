@@ -1,0 +1,10 @@
+{
+    "TaskName": "Darkest Things",
+    "TaskDescription": "Lastfm_tag: sentimental, Artist: The Submarines, Highlight_start: 41, Num_ratings: 15, VAQ_Estimate: 3, VAQ_Online: 2, AVG_Valence: 5.1333, STD_Valence: 1.0873, Q1_Valence: 1.0, Q2_Valence: 5.0, Q3_Valence: 6.0, AVG_Arousal: 2.4, STD_Arousal: 1.6248, Q1_Arousal: 1.0, Q2_Arousal: 2.0, Q3_Arousal: 3.0, AVG_Dominance: 4.4667, STD_Dominance: 2125.0, Q1_Dominance: 3.1667, Q2_Dominance: 5.0, Q3_Dominance: 6.0",
+    "Manufacturer": "Muse",
+    "SamplingFrequency": 256,
+    "EEGChannelCount": 4,
+    "EEGReference": "n/a",
+    "PowerLineFrequency": 50,
+    "SoftwareFilters": "n/a"
+}

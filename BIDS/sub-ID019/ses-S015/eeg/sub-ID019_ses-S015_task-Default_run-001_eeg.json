@@ -1,0 +1,10 @@
+{
+    "TaskName": "The One I Once Was",
+    "TaskDescription": "Lastfm_tag: terrible, Artist: Mortemia, Highlight_start: 211, Num_ratings: 15, VAQ_Estimate: 4, VAQ_Online: 4, AVG_Valence: 3.6667, STD_Valence: 1.4907, Q1_Valence: 4.1667, Q2_Valence: 3.0, Q3_Valence: 5.0, AVG_Arousal: 5.4667, STD_Arousal: 2.0613, Q1_Arousal: 4.1667, Q2_Arousal: 5.0, Q3_Arousal: 7.0, AVG_Dominance: 4.6, STD_Dominance: 1.7436, Q1_Dominance: 3.1667, Q2_Dominance: 5.0, Q3_Dominance: 6.0",
+    "Manufacturer": "Muse",
+    "SamplingFrequency": 256,
+    "EEGChannelCount": 4,
+    "EEGReference": "n/a",
+    "PowerLineFrequency": 50,
+    "SoftwareFilters": "n/a"
+}

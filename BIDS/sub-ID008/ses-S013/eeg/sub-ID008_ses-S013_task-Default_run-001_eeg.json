@@ -1,0 +1,10 @@
+{
+    "TaskName": "Goodbye My Almost Lover",
+    "TaskDescription": "Lastfm_tag: depressing, Artist: A Fine Frenzy, Highlight_start: 211, Num_ratings: 15, VAQ_Estimate: 3, VAQ_Online: 3, AVG_Valence: 4.2, STD_Valence: 1.6411, Q1_Valence: 3.0, Q2_Valence: 4.0, Q3_Valence: 6.0, AVG_Arousal: 3.6, STD_Arousal: 1.2, Q1_Arousal: 3.0, Q2_Arousal: 4.0, Q3_Arousal: 4.8333, AVG_Dominance: 4.6, STD_Dominance: 1.8184, Q1_Dominance: 3.0, Q2_Dominance: 5.0, Q3_Dominance: 6.0",
+    "Manufacturer": "Muse",
+    "SamplingFrequency": 256,
+    "EEGChannelCount": 4,
+    "EEGReference": "n/a",
+    "PowerLineFrequency": 50,
+    "SoftwareFilters": "n/a"
+}
