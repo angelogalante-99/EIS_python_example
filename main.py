@@ -18,13 +18,13 @@ from src.ml.predict import AnxietyPredictor
 from src.audio.audio_engine import AudioEngine
 
 # --- Configurazione ---
-EEG_BUFFER_SIZE = 512    # ~2 secondi a 256 Hz
+EEG_BUFFER_SIZE = 1024    # ~4 secondi a 256 Hz
 BAND_BUFFER_SIZE = 10    # finestre da mediare
 LOW_FREQ = 1.0
 HIGH_FREQ = 40.0
 USE_ML = False           # True se il modello SVM è già addestrato
 USE_BINAURAL = True
-USE_IADS = True
+USE_IADS = False #spento finchè non carichiamo i suoni
 
 record = RecordingData()
 preprocessing = Preprocessing()
@@ -38,15 +38,18 @@ audio.start()
 
 try:
     while True:
+        # 1. Acquisizione Dati (4 secondi)
         record.acquisition_record_data(eeg_buffer_size=EEG_BUFFER_SIZE)
         record.create_data_structure()
 
+        # 2. Preprocessing 
         preprocessing.band_pass_filter(record.raw, low=LOW_FREQ, high=HIGH_FREQ)
 
+        # 3. Estrazione Feature e Metriche
         features.extract_bands_power(raw=preprocessing.raw)
-
         metrics.extract_metrics(band_buffer=features.band_buffer, band_buffer_size=BAND_BUFFER_SIZE)
-
+         
+        # 4. Predizione e Modulazione Audio 
         if metrics.tbr is not None:
             _, anxiety_prob = predictor.predict(
                 tbr=metrics.tbr,
@@ -55,6 +58,7 @@ try:
             )
             audio.update(anxiety_prob=anxiety_prob)
 
+        # Pulizia buffer
         record.resize_eeg_buffer()
         features.resize_band_buffer(band_buffer_size=BAND_BUFFER_SIZE)
 

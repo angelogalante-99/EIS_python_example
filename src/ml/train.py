@@ -100,7 +100,7 @@ def load_dataset() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
             ts = session['time_series']  # shape (4, N)
             fs = LOW_SFREQ.get((subj_name, sid), SFREQ)
             
-            # --- MODIFICA CHIAVE: EPOCHING A 4 SECONDI ---
+            # EPOCHING A 4 SECONDI
             step = 4 * fs  # 4 secondi (es. 1024 campioni a 256Hz)
             n_samples = ts.shape[1]
             
@@ -114,7 +114,7 @@ def load_dataset() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
                     X.append(feat)
                     y.append(label_map[exp_id])
                     subjects.append(subj_idx)
-            # ---------------------------------------------
+        
 
     return np.array(X), np.array(y), np.array(subjects)
 
