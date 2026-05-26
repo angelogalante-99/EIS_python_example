@@ -1,13 +1,10 @@
 """
 Addestramento SVM sul dataset Muse (BIDS) con LOSO cross-validation.
+VERSIONE IBRIDA: Logica Baseline (2 Feature) + Epoching a 4 Secondi.
 
 Struttura attesa:
   data/dataframe.pkl  — generato da data_extraction.py
   data/Video_selezionati.xlsx — mappatura Experiment_id → VAQ label
-
-Canali Muse 2: 0=AF7, 1=TP9, 2=TP10, 3=AF8
-Label binaria: VAQ_Estimate 1-2 (basso arousal) → 0 calma
-               VAQ_Estimate 3-4 (alto arousal)  → 1 ansia/attivazione
 """
 import os
 import pickle
@@ -21,8 +18,8 @@ import joblib
 
 DATA_PKL   = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'dataframe.pkl')
 LABELS_XLS = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'Video_selezionati.xlsx')
-MODEL_PATH  = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'svm_model.pkl')
-SCALER_PATH = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'scaler.pkl')
+MODEL_PATH  = os.path.join(os.path.dirname(__file__), '..', '..', 'models', 'svm_model.pkl')
+SCALER_PATH = os.path.join(os.path.dirname(__file__), '..', '..', 'models', 'scaler.pkl')
 
 # Canali nel segnale Muse 2
 AF7_IDX = 0
@@ -41,7 +38,6 @@ LOW_SFREQ = {('sub-ID015', 'ses-S033'): 226, ('sub-ID015', 'ses-S038'): 217}
 
 
 def _build_label_map(xls_path: str) -> dict[int, int]:
-    """Mappa Experiment_id → label binaria (0=calma, 1=ansia)."""
     df = pd.read_excel(xls_path, header=0)
     df.columns = df.iloc[0]
     df = df.iloc[1:].reset_index(drop=True)
@@ -57,7 +53,6 @@ def _build_label_map(xls_path: str) -> dict[int, int]:
 
 
 def _session_to_exp_id(session_id: str) -> int:
-    """Converte 'ses-S006' → 6."""
     return int(session_id.replace('ses-S', '').lstrip('0') or '0')
 
 
@@ -68,7 +63,7 @@ def _band_power(signal: np.ndarray, low: float, high: float, fs: int) -> float:
 
 
 def _extract_features(time_series: np.ndarray, fs: int = SFREQ) -> np.ndarray:
-    """Estrae TBR e FAA dall'intera registrazione (shape: 4 x samples)."""
+    """Estrae TBR e FAA dall'epoca di 4 secondi passata."""
     af7 = time_series[AF7_IDX]
     af8 = time_series[AF8_IDX]
 
@@ -83,10 +78,6 @@ def _extract_features(time_series: np.ndarray, fs: int = SFREQ) -> np.ndarray:
 
 
 def load_dataset() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """
-    Carica pickle + label Excel.
-    Ritorna (X, y, subject_ids) con X shape (n_trials, 2).
-    """
     with open(DATA_PKL, 'rb') as f:
         data = pickle.load(f)
 
@@ -99,31 +90,38 @@ def load_dataset() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         for session in data[subj_name]:
             sid = session['session_id']
 
-            # Salta dati corrotti
             if (subj_name, sid) in CORRUPTED:
-                print(f'[SKIP] {subj_name} {sid} — dati corrotti')
                 continue
 
             exp_id = _session_to_exp_id(sid)
             if exp_id not in label_map:
-                print(f'[SKIP] {subj_name} {sid} — nessuna label per Experiment_id {exp_id}')
                 continue
 
             ts = session['time_series']  # shape (4, N)
             fs = LOW_SFREQ.get((subj_name, sid), SFREQ)
-
-            feat = _extract_features(ts, fs=fs)
-            X.append(feat)
-            y.append(label_map[exp_id])
-            subjects.append(subj_idx)
+            
+            # --- MODIFICA CHIAVE: EPOCHING A 4 SECONDI ---
+            step = 4 * fs  # 4 secondi (es. 1024 campioni a 256Hz)
+            n_samples = ts.shape[1]
+            
+            # Scorre l'intera registrazione a blocchi di 4 secondi
+            for i in range(0, n_samples - step, step):
+                epoch_data = ts[:, i:i+step]
+                
+                feat = _extract_features(epoch_data, fs=fs)
+                
+                if not np.isnan(feat).any():
+                    X.append(feat)
+                    y.append(label_map[exp_id])
+                    subjects.append(subj_idx)
+            # ---------------------------------------------
 
     return np.array(X), np.array(y), np.array(subjects)
 
 
 def loso_cross_validation() -> float:
-    """Leave-One-Subject-Out CV. Ritorna accuracy media."""
     X, y, subjects = load_dataset()
-    print(f'Dataset: {len(X)} trial, {len(np.unique(subjects))} soggetti')
+    print(f'Dataset: {len(X)} epoche da 4s, {len(np.unique(subjects))} soggetti')
     print(f'Distribuzione label: calma={np.sum(y==0)}, ansia={np.sum(y==1)}\n')
 
     unique_subjects = np.unique(subjects)
@@ -142,7 +140,6 @@ def loso_cross_validation() -> float:
         preds = clf.predict(X_test)
         acc = accuracy_score(y[test_mask], preds)
         accuracies.append(acc)
-        print(f'Soggetto {test_subj:02d} → accuracy: {acc:.3f}')
 
     mean_acc = float(np.mean(accuracies))
     print(f'\nLOSO mean accuracy: {mean_acc:.3f}')
@@ -150,7 +147,6 @@ def loso_cross_validation() -> float:
 
 
 def train_final_model():
-    """Addestra il modello su tutti i soggetti e lo salva in data/."""
     X, y, _ = load_dataset()
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
@@ -160,9 +156,11 @@ def train_final_model():
     os.makedirs(os.path.dirname(MODEL_PATH), exist_ok=True)
     joblib.dump(clf, MODEL_PATH)
     joblib.dump(scaler, SCALER_PATH)
-    print(f'Modello salvato → {MODEL_PATH}')
+    print(f'\nModello definitivo e Scaler salvati in {os.path.dirname(MODEL_PATH)}')
 
 
 if __name__ == '__main__':
+    print("Avvio Cross-Validazione LOSO sulle epoche...")
     loso_cross_validation()
+    print("\nAvvio Addestramento Finale...")
     train_final_model()

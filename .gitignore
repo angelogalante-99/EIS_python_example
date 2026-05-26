@@ -1,2 +1,12 @@
+# Ambienti virtuali
 venv/
+.env
+
+# Cache di Python
+__pycache__/
+*.pyc
+
+# Dataset e Modelli pesanti
+data/
+BIDS/
 *.pkl
