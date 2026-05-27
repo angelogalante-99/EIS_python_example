@@ -4,11 +4,6 @@ Neuro-Acoustic Grounding — pipeline principale.
 Flusso:
   Muse 2 → LSL → Preprocessing → Feature Extraction → Metrics (TBR/FAA)
   → SVM Prediction → Audio Engine (binaural beats + Soundscapes)
-
-Prerequisiti:
-  1. connect.py in esecuzione (stream LSL attivo)
-  2. Modello SVM addestrato: src/ml/train.py (richiede DREAMER)
-     Oppure: USE_ML = False per usare le soglie deterministiche
 """
 from src.recording.recording_data import RecordingData
 from src.preprocessing.preprocessing import Preprocessing
@@ -58,8 +53,8 @@ try:
                 anxiety_score=metrics.anxiety_score,
             )
             audio.update(anxiety_prob=anxiety_prob)
-             #fake_prob = (math.sin(time.time()) + 1.0) / 2.0
-             #audio.update(anxiety_prob=fake_prob)
+        #fake_prob = (math.sin(time.time()) + 1.0) / 2.0
+        #audio.update(anxiety_prob=fake_prob)
 
         # Pulizia buffer
         record.resize_eeg_buffer()
