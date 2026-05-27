@@ -7,6 +7,7 @@ Struttura attesa:
   data/Video_selezionati.xlsx — mappatura Experiment_id → VAQ label
 """
 import os
+import re
 import pickle
 import numpy as np
 import pandas as pd
@@ -53,7 +54,19 @@ def _build_label_map(xls_path: str) -> dict[int, int]:
 
 
 def _session_to_exp_id(session_id: str) -> int:
-    return int(session_id.replace('ses-S', '').lstrip('0') or '0')
+    """
+    Estrae il numero dell'esperimento da stringhe sporche.
+    Esempi supportati: 'ses-S006' -> 6, 'BIDS\\sub-ID000\\001' -> 1
+    """
+    # 1. Trova l'ultimo blocco di testo dopo uno slash (Windows o Mac/Linux)
+    clean_id = session_id.split('\\')[-1].split('/')[-1]
+    
+    # 2. Rimuove eventuali prefissi 'ses-S' o simili e tiene solo i numeri
+    match = re.search(r'\d+', clean_id)
+    
+    if match:
+        return int(match.group())
+    return 0
 
 
 def _band_power(signal: np.ndarray, low: float, high: float, fs: int) -> float:

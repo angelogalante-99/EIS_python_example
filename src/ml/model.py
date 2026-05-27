@@ -2,8 +2,8 @@ import os
 import numpy as np
 import joblib
 
-MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'svm_model.pkl')
-SCALER_PATH = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'scaler.pkl')
+MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', '..', 'models', 'svm_model.pkl')
+SCALER_PATH = os.path.join(os.path.dirname(__file__), '..', '..', 'models', 'scaler.pkl')
 
 
 class AnxietyModel:
