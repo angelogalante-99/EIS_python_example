@@ -11,6 +11,7 @@ scipy==1.13.0
 scikit-learn==1.4.2
 sktime==0.28.0
 openpyxl
+numba
 
 # --- Audio e UI ---
 pygame==2.5.2

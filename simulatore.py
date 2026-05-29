@@ -1,58 +1,63 @@
 """
-Simulatore EEG — genera un segnale LSL sintetico per test offline.
-Esegui questo script al posto di connect.py quando il Muse 2 non è disponibile.
-
-Simula due stati alternati ogni 10 secondi: CALMA e ANSIA.
+Simulatore EEG Biomedico (Calibrato) — Segnale LSL in scala microVolt (µV).
+Allineato alla mappatura canali del dataset: [AF7, TP9, TP10, AF8]
 """
 import time
 import numpy as np
 from pylsl import StreamInfo, StreamOutlet
 
 SFREQ = 256
-N_CHANNELS = 4  # TP9, AF7, AF8, TP10
+N_CHANNELS = 4  
 CHUNK_SIZE = 32
 
-info = StreamInfo(
-    name='Muse',
-    type='EEG',
-    channel_count=N_CHANNELS,
-    nominal_srate=SFREQ,
-    channel_format='float32',
-    source_id='sim_muse2',
-)
+def _generate_pink_noise(n_samples, scale_uv):
+    white = np.random.randn(n_samples)
+    fft = np.fft.rfft(white)
+    frequencies = np.fft.rfftfreq(n_samples)
+    frequencies[0] = 1.0  
+    pink_fft = fft / np.sqrt(frequencies)
+    return np.fft.irfft(pink_fft, n_samples) * scale_uv
+
+info = StreamInfo('Muse', 'EEG', N_CHANNELS, SFREQ, 'float32', 'sim_muse2')
 outlet = StreamOutlet(info)
 
-print('Simulatore EEG avviato. Premi Ctrl+C per terminare.')
-t = 0.0
+print('Simulatore EEG Calibrato avviato. Premi Ctrl+C per terminare.')
 
 try:
     while True:
-        # Alterna calma (theta alta, beta bassa) e ansia ogni 10s
-        calm = (int(time.time()) % 20) < 10
-        label = 'CALMA' if calm else 'ANSIA'
-
+        calma = (int(time.time()) % 20) < 10
         chunk = []
-        for _ in range(CHUNK_SIZE):
-            if calm:
-                # calma: theta dominante, beta bassa
-                af7 = 0.6 * np.sin(2 * np.pi * 6 * t) + 0.1 * np.random.randn()
-                af8 = 0.5 * np.sin(2 * np.pi * 6 * t) + 0.1 * np.random.randn()
-            else:
-                # ansia: beta dominante, theta bassa
-                af7 = 0.2 * np.sin(2 * np.pi * 6 * t) + 0.6 * np.sin(2 * np.pi * 20 * t) + 0.1 * np.random.randn()
-                af8 = 0.2 * np.sin(2 * np.pi * 6 * t) + 0.5 * np.sin(2 * np.pi * 20 * t) + 0.1 * np.random.randn()
+        
+        base_noise = _generate_pink_noise(CHUNK_SIZE, 5.0) 
+        t_array = np.linspace(0, CHUNK_SIZE/SFREQ, CHUNK_SIZE, endpoint=False)
+        
+        if calma:
+            theta = 15.0 * np.sin(2 * np.pi * 6.5 * t_array)
+            alpha = 30.0 * np.sin(2 * np.pi * 10.0 * t_array)
+            beta  = 5.0  * np.sin(2 * np.pi * 22.0 * t_array)
+            
+            af7 = theta + alpha + beta + base_noise
+            af8 = theta + alpha + beta + base_noise + np.random.randn(CHUNK_SIZE)*1.0 
+            
+        else:
+            theta = 5.0  * np.sin(2 * np.pi * 6.5 * t_array)
+            beta  = 25.0 * np.sin(2 * np.pi * 25.0 * t_array) 
+            
+            # Ansia = Meno Alpha a sinistra (AF7), più Alpha a destra (AF8)
+            alpha_sx = 10.0 * np.sin(2 * np.pi * 10.0 * t_array) 
+            alpha_dx = 30.0 * np.sin(2 * np.pi * 10.0 * t_array) 
+            
+            af7 = theta + alpha_sx + beta + base_noise
+            af8 = theta + alpha_dx + beta + base_noise
 
-            sample = [
-                0.1 * np.random.randn(),  # TP9 (non usato)
-                float(af7),               # AF7
-                float(af8),               # AF8
-                0.1 * np.random.randn(),  # TP10 (non usato)
-            ]
-            chunk.append(sample)
-            t += 1.0 / SFREQ
+        tp9_tp10 = base_noise 
+        
+        for i in range(CHUNK_SIZE):
+            # IL FIX E' QUI: Ordine [AF7 (0), TP9 (1), TP10 (2), AF8 (3)] come da README
+            chunk.append([af7[i], tp9_tp10[i], tp9_tp10[i], af8[i]])
 
         outlet.push_chunk(chunk)
-        print(f'[SIM] Stato: {label}', end='\r')
+        print(f"[SIMULATORE] Invio stato: {'CALMA' if calma else 'ANSIA'}...", end='\r')
         time.sleep(CHUNK_SIZE / SFREQ)
 
 except KeyboardInterrupt:
