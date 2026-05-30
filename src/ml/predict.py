@@ -5,9 +5,6 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 class AnxietyPredictor:
     def __init__(self, use_ml: bool = True, model_type: str = 'svm'):
-        """
-        model_type può essere: 'svm' oppure 'minirocket'
-        """
         self.use_ml = use_ml
         self.model = AnxietyModel()
         self.label = None
@@ -15,19 +12,28 @@ class AnxietyPredictor:
 
         if use_ml:
             try:
-                # Passiamo il tipo di modello desiderato alla funzione load
                 self.model.load(model_type)
             except Exception as e:
-                print(f"[ML ERRORE] Impossibile caricare il modello richiesto ({model_type}): {e}")
+                print(f"[ML ERRORE] Impossibile caricare il modello ({model_type}): {e}")
                 self.use_ml = False
 
-    def predict(self, tbr: float = None, faa: float = None, raw_af7: list = None, raw_af8: list = None, anxiety_score: float = None):
+    def predict(self, 
+                tbr_af7: float = None, tbr_tp9: float = None, tbr_tp10: float = None, tbr_af8: float = None, 
+                faa: float = None, taa: float = None, 
+                raw_af7: list = None, raw_tp9: list = None, raw_tp10: list = None, raw_af8: list = None, 
+                anxiety_score: float = None):
         if self.use_ml:
-            if self.model.model_type == 'svm' and tbr is not None and faa is not None:
-                self.label, self.anxiety_prob = self.model.predict_svm(tbr, faa)
+            # Controllo 6 feature per SVM
+            if self.model.model_type == 'svm' and all(v is not None for v in [tbr_af7, tbr_tp9, tbr_tp10, tbr_af8, faa, taa]):
+                self.label, self.anxiety_prob = self.model.predict_svm(tbr_af7, tbr_tp9, tbr_tp10, tbr_af8, faa, taa)
                 
-            elif self.model.model_type == 'minirocket' and raw_af7 is not None and raw_af8 is not None:
-                self.label, self.anxiety_prob = self.model.predict_minirocket(raw_af7, raw_af8)
+            # Controllo 4 canali RAW per MiniRocket
+            elif self.model.model_type == 'minirocket' and all(v is not None for v in [raw_af7, raw_tp9, raw_tp10, raw_af8]):
+                self.label, self.anxiety_prob = self.model.predict_minirocket(raw_af7, raw_tp9, raw_tp10, raw_af8)
+                
+            # Controllo 4 canali RAW per EEGNet
+            elif self.model.model_type == 'eegnet' and all(v is not None for v in [raw_af7, raw_tp9, raw_tp10, raw_af8]):
+                self.label, self.anxiety_prob = self.model.predict_eegnet(raw_af7, raw_tp9, raw_tp10, raw_af8)
                 
             else:
                 self.anxiety_prob = anxiety_score or 0.5

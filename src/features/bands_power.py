@@ -10,7 +10,6 @@ SFREQ = 256
 EPOCH_DURATION = 4  # secondi
 NPERSEG = SFREQ * EPOCH_DURATION
 
-
 class BandsPower:
     def __init__(self):
         self.band_buffer = []
@@ -21,15 +20,29 @@ class BandsPower:
         return float(np.trapz(psd[idx], freqs[idx]))
 
     def extract_bands_power(self, raw, sfreq: int = SFREQ):
-        data = raw.get_data()  # shape (2, samples): AF7=0, AF8=1
-        af7 = data[0]
-        af8 = data[1]
+        data = raw.get_data() 
+        
+        # ORDINE DATASET: 0:AF7, 1:TP9, 2:TP10, 3:AF8
+        af7  = data[0]
+        tp9  = data[1] if data.shape[0] > 1 else data[0]
+        tp10 = data[2] if data.shape[0] > 2 else data[0]
+        af8  = data[3] if data.shape[0] > 3 else data[1]
 
         epoch = {
             'AF7': {
                 'theta': self._band_power(af7, *THETA_BAND),
                 'alpha': self._band_power(af7, *ALPHA_BAND),
                 'beta':  self._band_power(af7, *BETA_BAND),
+            },
+            'TP9': {
+                'theta': self._band_power(tp9, *THETA_BAND),
+                'alpha': self._band_power(tp9, *ALPHA_BAND),
+                'beta':  self._band_power(tp9, *BETA_BAND),
+            },
+            'TP10': {
+                'theta': self._band_power(tp10, *THETA_BAND),
+                'alpha': self._band_power(tp10, *ALPHA_BAND),
+                'beta':  self._band_power(tp10, *BETA_BAND),
             },
             'AF8': {
                 'theta': self._band_power(af8, *THETA_BAND),

@@ -5,20 +5,27 @@ pyEDFlib==0.1.42
 pyxdf==1.16.4
 neurokit2==0.2.7
 
-# --- Matematica e Machine Learning ---
+# --- Matematica e Machine Learning (Classico) ---
 numpy==1.26.4
 scipy==1.13.0
 scikit-learn==1.4.2
 sktime==0.28.0
-openpyxl
-numba
+pandas
+
+# --- Deep Learning (PyTorch) ---
+torch==2.1.2 
+torchvision==0.16.2
+torchaudio==2.1.2
+skorch==0.15.0
 
 # --- Audio e UI ---
 pygame==2.5.2
 matplotlib==3.8.4
 pyaudio
 
-# --- Utility dal tuo file originale ---
+# --- Utility ---
+openpyxl
+numba
 certifi
 charset-normalizer
 contourpy

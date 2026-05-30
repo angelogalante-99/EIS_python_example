@@ -9,3 +9,6 @@ __pycache__/
 # Dataset e Modelli pesanti
 *.pkl
 *.xlsx
+
+# Altro
+training.txt
