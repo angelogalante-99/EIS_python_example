@@ -2,7 +2,7 @@ import zipfile
 import pandas as pd
 
 ZIP_PATH = "original_data.zip"
-OUTPUT_PATH = "eeg_dataset_final.csv"
+OUTPUT_PATH = "eeg_dataset_raw.csv"
 
 dfs = []
 
@@ -15,7 +15,7 @@ with zipfile.ZipFile(ZIP_PATH, "r") as z:
 
         parts = filename.replace(".csv", "").split("-")
 
-        # 2. IL SALVAVITA: Se il nome non ha 3 parti (soggetto-stato-sessione), saltalo
+        # 2. Se il nome non ha 3 parti (soggetto-stato-sessione), saltalo
         if len(parts) < 3:
             print(f"Ignorato file/cartella anomala: {filename}")
             continue
