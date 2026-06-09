@@ -14,7 +14,7 @@ import mne
 import matplotlib.pyplot as plt
 
 # ── Configurazione ──────────────────────────────────────────
-CSV_PATH     = "eeg_dataset_preprocessed.csv"
+CSV_PATH     = "data/eeg_dataset_preprocessed.csv"
 SFREQ        = 256.0                          # Hz
 LABEL_MAP    = {0: "neutral", 1: "concentrating"}
 

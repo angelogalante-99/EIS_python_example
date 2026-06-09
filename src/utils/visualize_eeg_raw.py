@@ -15,7 +15,7 @@ import mne
 import matplotlib.pyplot as plt
 
 # ── Configurazione ──────────────────────────────────────────
-CSV_PATH  = "eeg_dataset_raw.csv"   # cambia con il percorso del tuo file
+CSV_PATH  = "data/eeg_dataset_raw.csv"   # cambia con il percorso del tuo file
 SFREQ     = 256.0                      # frequenza di campionamento Muse (Hz)
 LABEL_MAP = {0: "neutral", 1: "concentrating"}  # mappatura label → nome
 

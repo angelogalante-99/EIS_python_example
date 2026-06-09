@@ -1,3 +1,5 @@
 venv/
 original_data.zip
 *.csv
+sanity_checks/
+models/

@@ -12,8 +12,8 @@ import mne
 import os
 
 # ── Configurazione ──────────────────────────────────────────
-INPUT_CSV     = "eeg_dataset_raw.csv"
-OUTPUT_CSV    = "eeg_dataset_preprocessed.csv"
+INPUT_CSV     = "data/eeg_dataset_raw.csv"
+OUTPUT_CSV    = "data/eeg_dataset_preprocessed.csv"
 
 SFREQ         = 256.0           # Hz
 EPOCH_LEN_S   = 4.0             # Lunghezza di ogni epoca in secondi

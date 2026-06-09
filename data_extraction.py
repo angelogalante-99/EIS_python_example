@@ -2,7 +2,7 @@ import zipfile
 import pandas as pd
 
 ZIP_PATH = "original_data.zip"
-OUTPUT_PATH = "eeg_dataset_raw.csv"
+OUTPUT_PATH = "data/eeg_dataset_raw.csv"
 
 dfs = []
 
