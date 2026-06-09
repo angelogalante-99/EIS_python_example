@@ -11,9 +11,9 @@ import numpy as np
 import mne
 import os
 
-# ── Configurazione ──────────────────────────────────────────
-INPUT_CSV     = "data/eeg_dataset_raw.csv"
-OUTPUT_CSV    = "data/eeg_dataset_preprocessed.csv"
+BASE_DIR   = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+INPUT_CSV  = os.path.join(BASE_DIR, "data", "eeg_dataset_raw.csv")
+OUTPUT_CSV = os.path.join(BASE_DIR, "data", "eeg_dataset_preprocessed.csv")
 
 SFREQ         = 256.0           # Hz
 EPOCH_LEN_S   = 4.0             # Lunghezza di ogni epoca in secondi

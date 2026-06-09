@@ -11,12 +11,12 @@ import neurokit2 as nk
 import matplotlib.pyplot as plt
 import os
 
-# ── Configurazione ──────────────────────────────────────────
-INPUT_CSV  = "data/eeg_dataset_preprocessed.csv"  # soglia globale 300-500uV
-OUTPUT_CSV = "data/final_features.csv"
+BASE_DIR   = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+INPUT_CSV  = os.path.join(BASE_DIR, "data", "eeg_dataset_preprocessed.csv")
+OUTPUT_CSV = os.path.join(BASE_DIR, "data", "final_features.csv")
 
 # Impostiamo il percorso corretto per i grafici: cartella "features", sottocartella "sanity_checks"
-SANITY_DIR = os.path.join("src", "features", "sanity_checks")
+SANITY_DIR = os.path.join(BASE_DIR, "src", "features", "sanity_checks")
 
 SFREQ    = 256.0
 CHANNELS = ["TP9", "AF7", "AF8", "TP10"]

@@ -1,59 +1,84 @@
+"""
+Data Extraction — EEG Dataset
+------------------------------
+Legge i CSV dall'archivio ZIP e li unisce in un unico file raw.
+
+Le sessioni vengono numerate in modo UNIVOCO per soggetto:
+  subjecta-neutral-1.csv       → session=1, label=0
+  subjecta-neutral-2.csv       → session=2, label=0
+  subjecta-concentrating-1.csv → session=3, label=1
+  subjecta-concentrating-2.csv → session=4, label=1
+
+Garanzia: ogni (subject, session) ha sempre una sola label.
+"""
+
 import zipfile
 import pandas as pd
+import os
 
-ZIP_PATH = "original_data.zip"
-OUTPUT_PATH = "data/eeg_dataset_raw.csv"
+BASE_DIR    = os.path.dirname(os.path.abspath(__file__))
+ZIP_PATH    = os.path.join(BASE_DIR, "original_data.zip")
+OUTPUT_PATH = os.path.join(BASE_DIR, "data", "eeg_dataset_raw.csv")
 
 dfs = []
+session_counter = {}  # {subject: contatore sessione univoco}
 
 with zipfile.ZipFile(ZIP_PATH, "r") as z:
-    for filename in z.namelist():
+    # Ordine alfabetico garantisce: concentrating-1, concentrating-2, neutral-1, neutral-2
+    csv_files = sorted([f for f in z.namelist() if f.endswith(".csv")])
 
-        # 1. Ignora cartelle e file nascosti di sistema che non sono CSV
-        if not filename.endswith(".csv"):
-            continue
+    for filename in csv_files:
+        basename = os.path.basename(filename)
+        parts    = basename.replace(".csv", "").split("-")
 
-        parts = filename.replace(".csv", "").split("-")
-
-        # 2. Se il nome non ha 3 parti (soggetto-stato-sessione), saltalo
         if len(parts) < 3:
-            print(f"Ignorato file/cartella anomala: {filename}")
+            print(f"  Ignorato: {filename}")
             continue
 
         subject = parts[0]
-        state = parts[1]
+        state   = parts[1]
         session = int(parts[2])
 
-        # Scarta lo stato relaxed
         if state == "relaxed":
             continue
 
-        # Assegna 1 per concentrating, 0 per neutral
         label = 1 if state == "concentrating" else 0
 
-        # Legge i dati
+        # Incrementa contatore univoco per soggetto
+        if subject not in session_counter:
+            session_counter[subject] = 0
+        session_counter[subject] += 1
+        unique_session = session_counter[subject]
+
         with z.open(filename) as f:
             df = pd.read_csv(f)
 
-        # Aggiunge le colonne necessarie
         df["subject"] = subject
-        df["session"] = session
-        df["label"] = label
+        df["session"] = unique_session
+        df["label"]   = label
 
         dfs.append(df)
-        print(f"Elaborato: {filename}")
+        print(f"  {basename:45s} → session={unique_session}  label={label}  ({len(df):,} righe)")
 
-# Unisce tutti i file in un'unica tabella
 merged = pd.concat(dfs, ignore_index=True)
 
-# Crea l'ordine esatto: [Soggetto] + [Sessione] + [TUTTE LE METRICHE] + [Label finale]
-metric_cols = [col for col in merged.columns if col not in ["subject", "session", "label"]]
-final_cols = ["subject", "session"] + metric_cols + ["label"]
+signal_cols = [c for c in merged.columns if c not in ["subject", "session", "label"]]
+merged      = merged[["subject", "session"] + signal_cols + ["label"]]
 
-# Applica il nuovo ordine
-merged = merged[final_cols]
+# Verifica finale
+check    = merged.groupby(["subject", "session"])["label"].nunique()
+problemi = check[check > 1]
+if problemi.empty:
+    print("\nVerifica OK — ogni (subject, session) ha una sola label.")
+else:
+    print("\nERRORE — sessioni con label multiple:")
+    print(problemi)
 
-# Salva il risultato
+os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
 merged.to_csv(OUTPUT_PATH, index=False)
 
-print(f"\nFinito! Salvato {OUTPUT_PATH} con {len(merged):,} righe totali.")
+print(f"\nSalvato: {OUTPUT_PATH}")
+print(f"Righe totali: {len(merged):,}")
+print(f"\nDistribuzione (subject, session, label):")
+print(merged.groupby(["subject", "session", "label"])["timestamps"]
+      .count().rename("campioni").to_string())
