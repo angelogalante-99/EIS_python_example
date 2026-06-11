@@ -1,0 +1,79 @@
+allora mi spieghi questa questione dei pesi come li hai calcolati, spiegami tutto l iter per ogni valore che sta nella heatmap e nel grafico ad istogrammi17:58Claude ha risposto: Perfetto, ti ricostruisco tutto dall'inizio.Perfetto, ti ricostruisco tutto dall'inizio. Ci sono tre calcoli distinti che si concatenano — l'indice EMG, i pesi, e il |d| pesato. Facciamoli uno alla volta con i numeri reali.
+
+Step 1 — Indice EMG per soggetto
+L'idea è: quanto è "sporco" il segnale di un soggetto in alta frequenza? Usiamo la potenza nella banda 30-40 Hz divisa per la potenza totale — quella banda è quasi esclusivamente muscolare, il cervello non genera quasi nulla lì sopra.Eseguiti 3 comandiEseguiti 3 comandiOra hai tutto il percorso completo. Ricapitolo i 4 step in modo che li tieni a mente:
+
+Step 1 — Indice EMG per soggetto
+Per ogni soggetto, su ogni epoca e ogni canale, calcoli quanto della potenza totale sta nella banda 30-40 Hz — quella quasi esclusivamente muscolare. Fai la media su tutte le epoche e tutti i canali. Risultato:
+subjecta → 3.68%   (pulito)
+subjectb → 3.01%   (il più pulito)
+subjectd → 4.62%   (il più sporco)
+Step 2 — Da indice EMG a peso
+Il peso è l'inverso dell'indice EMG, normalizzato a somma 1. Chi è più pulito pesa di più:
+subjecta → 1/3.68 → normalizzato → 0.331
+subjectb → 1/3.01 → normalizzato → 0.405  ← peso maggiore
+subjectd → 1/4.62 → normalizzato → 0.264  ← peso minore
+Step 3 — Cohen's d per soggetto per feature
+Per ogni soggetto separi le epoche in neutral e concentrating, calcoli la media e la std pooled, e dividi. Per Rel_Alpha_AF8:
+subjecta: d = −1.91   (media n=0.0863, media c=0.0258, sp=0.0317)
+subjectb: d = −2.50   (media n=0.0741, media c=0.0172, sp=0.0228)
+subjectd: d = −2.16   (media n=0.0858, media c=0.0156, sp=0.0325)
+Questi tre numeri sono le tre celle della prima riga della heatmap. Il colore rosso scuro corrisponde a valori intorno a −2, il bianco a zero, il blu scuro a +2.
+Step 4 — |d| medio pesato → lunghezza della barra
+w|d| = 0.331×1.91 + 0.405×2.50 + 0.264×2.16
+     = 0.631 + 1.011 + 0.570
+     = 2.21
+Questa è la lunghezza della barra verde più lunga nell'istogramma, quella di Rel_Alpha_AF8. Ogni altra feature ha la sua barra calcolata con la stessa formula — e la heatmap è ordinata dall'alto in basso per questo valore decrescente.
+
+ok entra piu nel dettaglio abbiamo i valori grezzi elettrici di af7 soggA prendiamo la prim epoca 1024campioni , divido in finestre d 1 sec calcolo fft su ste 4 finestre e faccio media e cosa ottengo?18:13Claude ha risposto: Perfetto, andiamo nel dettaglio assoluto.Perfetto, andiamo nel dettaglio assoluto. Prendiamo proprio quell'epoca e seguiamo ogni passaggio.Step by step from raw signal to FFT to power to Welch PSDStep by step from raw signal to FFT to power to Welch PSDOra hai tutto. Seguiamo i numeri reali passo per passo.
+
+Il segnale grezzo
+Hai 1024 numeri in µV — il voltaggio di AF8 misurato ogni 3.9 ms. I primi valori sono: 0.0, −64.6, −96.7, −88.2, −59.0... Il segnale oscilla attorno allo zero (media −3.96 µV) con picchi fino a ±97 µV. Questi numeri da soli non ti dicono nulla sulla frequenza — sai solo che il voltaggio sale e scende, ma non a che ritmo.
+
+Step 1 — 4 finestre da 1 secondo
+Dividi i 1024 campioni in 4 blocchi da 256:
+finestra 1: campioni 0-255    (t=0→1s)
+finestra 2: campioni 256-511  (t=1→2s)
+finestra 3: campioni 512-767  (t=2→3s)
+finestra 4: campioni 768-1023 (t=3→4s)
+Ogni finestra è un secondo di segnale. La finestra 1 è più rumorosa (std=33.6) — la finestra 4 più tranquilla (std=14.1). Questo è normale — il segnale cambia nel tempo.
+
+Step 2 — FFT su una finestra
+Prendi la finestra 1 (256 numeri reali) e ci applichi la FFT. Ottieni 129 numeri complessi, uno per ogni frequenza da 0 a 128 Hz a passi di 1 Hz.
+Ogni numero complesso è nella forma a + bj. Per la frequenza di 1 Hz il risultato è −1005 + 4719j. Questo numero ti dice due cose:
+
+modulo = sqrt(1005² + 4719²) = 4826 → quanto è forte quella frequenza
+fase = angolo → in che punto del ciclo si trova
+
+Per la PSD ti serve solo il modulo — la fase non interessa.
+
+Step 3 — Da FFT a potenza
+Quadri il modulo e dividi per N (per normalizzare rispetto alla lunghezza della finestra):
+potenza a 1 Hz = 4826² / 256 = 90.971
+potenza a 8 Hz = 226²  / 256 = 199
+Valori grandi = quella frequenza è forte nel segnale. Valori piccoli = quasi assente.
+
+Step 4 — Ripeto sulle 4 finestre
+Faccio lo stesso calcolo su tutte e 4 le finestre. Guarda cosa succede a 1 Hz:
+finestra 1 → 90.971
+finestra 2 → 10.133
+finestra 3 → 16.546
+finestra 4 →  8.002
+Valori molto diversi — il segnale non è stazionario. La finestra 1 aveva un burst di attività a bassa frequenza che le altre non hanno.
+
+Step 5 — Media tra le 4 finestre → PSD finale
+Per ogni bin di frequenza faccio la media delle 4 potenze:
+1 Hz: (90.971 + 10.133 + 16.546 + 8.002) / 4 = 31.413
+8 Hz: (198.993 + 257.416 + 1051.389 + 111.835) / 4 = 404.908
+Questa media è la PSD Welch — una stima stabile della potenza a ogni frequenza, ottenuta mediando su più finestre per ridurre il rumore. Il vantaggio rispetto a fare la FFT sull'intera epoca è proprio questo: una singola FFT su 4 secondi è molto sensibile a eventi isolati. La media di 4 finestre da 1 secondo è molto più stabile.
+
+Conversione in dB per il grafico
+Le potenze raw sono numeri grandi e difficili da leggere (11728, 31413...). Per il grafico le converti in dB:
+dB = 10 × log10(potenza)
+
+1 Hz:  10 × log10(31413) = 44.97 dB
+8 Hz:  10 × log10(404.9) = 26.07 dB
+Questo è il valore sull'asse Y dei grafici PSD che abbiamo visto. Il 1 Hz è più alto del 8 Hz nel grafico — e infatti 44.97 > 26.07. Più alta la barra = più potenza a quella frequenza.
+
+La cosa fondamentale da capire
+La FFT non inventa niente — prende i 256 numeri del segnale nel tempo e li riscrive come somma di sinusoidi. Alla fine hai la stessa informazione vista da un'angolazione diversa: invece di "quanto vale il voltaggio a ogni istante" hai "quanto è forte ogni frequenza nell'intera finestra".
