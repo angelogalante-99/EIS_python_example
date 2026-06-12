@@ -1,91 +1,77 @@
 """
-Inference Pipeline - Subject & State Filtering
-----------------------------------------------
-Carica i modelli dell'ensemble, seleziona un'epoca reale filtrando per
-Soggetto e Stato Cognitivo, e calcola la media probabilistica del verdetto.
+Prediction — da feature a verdetto
+-------------------------------------
+Modulo "puro": riceve un vettore di 6 feature (già estratte da
+features_extraction.extract_features(), chiamata dal main) e
+restituisce un verdetto tramite voto di maggioranza tra i 3
+model_final.pkl (SVM, LDA, LightGBM).
+
+Non fa I/O (streaming.py), non fa preprocessing (preprocessing.py),
+non fa estrazione feature (features_extraction.py) — solo
+"feature in -> verdetto out".
 """
 
 import os
 import joblib
 import numpy as np
-import pandas as pd
-import glob
 
-# Configurazione percorsi
-MODEL_DIR = os.path.join("src", "ml", "models", "rf")
-CSV_PATH  = os.path.join("data", "final_features.csv")
+BASE_DIR       = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+MODEL_BASE_DIR = os.path.join(BASE_DIR, "src", "ml", "models")
 
-def predict_with_ensemble(new_epoch_features):
-    """Interroga i 4 modelli della LOSO, media le probabilità e restituisce il verdetto."""
-    model_files = glob.glob(os.path.join(MODEL_DIR, "model_excluding_*.pkl"))
-    
-    if not model_files:
-        print("Errore: Nessun modello trovato nella cartella.")
-        return
-        
-    print(f"\nModelli caricati nell'Ensemble: {len(model_files)}")
-    all_probabilities = []
-    
-    for model_path in model_files:
-        model = joblib.load(model_path)
-        # Estraiamo la probabilità per la classe 1 (Ansia/Concentrazione)
-        prob = model.predict_proba([new_epoch_features])[0][1] 
-        all_probabilities.append(prob)
-        
-        model_name = os.path.basename(model_path)
-        print(f"  -> {model_name: <32} vota: {prob * 100:.1f}% Ansia")
-        
-    # Media delle probabilità
-    final_prob = np.mean(all_probabilities)
-    print("-" * 55)
-    print(f"Probabilità Media dell'Ensemble: {final_prob * 100:.1f}%")
-    
-    if final_prob >= 0.50:
-        print("VERDETTO FINALE: L'utente è in stato di CONCENTRAZIONE/ANSIA (Label 1)")
+LABEL_MAP = {0: "neutral", 1: "concentrating"}
+
+# Modelli da caricare — ognuno ha un model_final.pkl addestrato su
+# tutti i soggetti (a+b+d, subjectc escluso — vedi train.py)
+MODEL_NAMES = ["svm", "lda", "lgbm"]
+
+
+def load_models():
+    """Carica i model_final.pkl per ciascun modello (vedi MODEL_NAMES)."""
+    models = {}
+    for name in MODEL_NAMES:
+        path = os.path.join(MODEL_BASE_DIR, name, "model_final.pkl")
+        if not os.path.exists(path):
+            print(f"  ⚠ Modello non trovato: {path} — escluso dal voto.")
+            continue
+        models[name] = joblib.load(path)
+        print(f"  Caricato: {name.upper()} ← {path}")
+    if not models:
+        raise FileNotFoundError(
+            "Nessun model_final.pkl trovato. Esegui prima train.py.")
+    return models
+
+
+def predict_epoch(models, features):
+    """
+    Predice lo stato a partire da un vettore di 6 feature.
+
+    features: array-like di 6 valori, ordine = FEATURE_NAMES
+              (vedi features_extraction.py)
+
+    Voto di maggioranza: se >= metà vota concentrating (1) -> concentrating.
+    In caso di pareggio esatto decide in base alla probabilità media.
+
+    Ritorna: (verdetto:int, dettagli:dict con votes/probs/n_concentrating/n_models)
+    """
+    X = np.asarray(features).reshape(1, -1)
+    votes, probs = {}, {}
+
+    for name, model in models.items():
+        pred = int(model.predict(X)[0])
+        votes[name] = pred
+        if hasattr(model, "predict_proba"):
+            probs[name] = float(model.predict_proba(X)[0][1])  # P(concentrating)
+
+    n_concentrating = sum(votes.values())
+    n_models        = len(votes)
+
+    if n_concentrating * 2 > n_models:
+        verdict = 1
+    elif n_concentrating * 2 < n_models:
+        verdict = 0
     else:
-        print("VERDETTO FINALE: L'utente è RILASSATO/NEUTRAL (Label 0)")
+        mean_prob = np.mean(list(probs.values())) if probs else 0.5
+        verdict = 1 if mean_prob >= 0.5 else 0
 
-
-if __name__ == "__main__":
-    if not os.path.exists(CSV_PATH):
-        print(f"Errore: Dataset {CSV_PATH} non trovato.")
-        exit()
-
-    df = pd.read_csv(CSV_PATH)
-    
-    # ── IMPOSTA I TUOI CRITERI DI RICERCA QUI ───────────────────
-    TARGET_SUBJECT = "subjecta"  # Opzioni: "subjecta", "subjectb", "subjectc", "subjectd"
-    TARGET_LABEL   = 1           # Opzioni: 0 (Rilassato), 1 (Concentrato)
-    # ──────────────────────────────────────────────────────────
-
-    # Filtro intelligente: gestisce sia "subjecta" che "original_data/subjecta"
-    filtered_df = df[
-        (df["subject"].str.contains(TARGET_SUBJECT, case=False)) & 
-        (df["label"] == TARGET_LABEL)
-    ]
-
-    if filtered_df.empty:
-        print(f"Nessuna epoca trovata per il Soggetto '{TARGET_SUBJECT}' con Label {TARGET_LABEL}.")
-        print("Controlla i nomi presenti nel tuo CSV.")
-        exit()
-
-    # Estraiamo un'epoca casuale tra quelle che soddisfano il filtro
-    chosen_epoch = filtered_df.sample(n=1, random_state=42) # random_state fisso per riproducibilità, rimuovilo se vuoi vera casualità
-    
-    epoch_id = chosen_epoch["epoch_id"].iloc[0]
-    subject_real_name = chosen_epoch["subject"].iloc[0]
-    vera_label = chosen_epoch["label"].iloc[0]
-    
-    # Isola le 33 colonne matematiche
-    feature_cols = [c for c in df.columns if c not in ["subject", "session", "epoch_id", "label"]]
-    veri_dati_eeg = chosen_epoch[feature_cols].values[0]
-
-    print("=" * 60)
-    print(f"RICERCA COMPLETATA - ESTRATTA EPOCA CASUALE")
-    print(f"  Soggetto Reale : {subject_real_name}")
-    print(f"  ID Epoca       : #{epoch_id}")
-    print(f"  Stato Reale    : {'CONCENTRATO/ANSIA (1)' if vera_label == 1 else 'RILASSATO/NEUTRAL (0)'}")
-    print("=" * 60)
-
-    # Avvia la predizione
-    predict_with_ensemble(veri_dati_eeg)
+    return verdict, {"votes": votes, "probs": probs,
+                     "n_concentrating": n_concentrating, "n_models": n_models}

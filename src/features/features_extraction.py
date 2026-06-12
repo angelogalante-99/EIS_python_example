@@ -58,6 +58,72 @@ SFREQ      = 256.0
 CHANNELS   = ["TP9", "AF7", "AF8", "TP10"]
 WINDOW_SEC = 1   # finestre Welch da 1 s → risoluzione spettrale 1 Hz
 
+# Nomi delle 6 feature, nello stesso ordine restituito da extract_features()
+# e nello stesso ordine delle colonne di final_features.csv
+FEATURE_NAMES = [
+    "Abs_Theta_AF7", "Rel_Theta_AF7",
+    "Abs_Alpha_AF8", "Rel_Alpha_AF8",
+    "Abs_Theta_AF8", "FAA",
+]
+
+
+def band_power(psd_df, lo, hi):
+    """Integra una PSD (DataFrame con colonne Frequency/Power) su [lo, hi) Hz."""
+    f = psd_df["Frequency"].values
+    p = psd_df["Power"].values
+    mask = (f >= lo) & (f < hi)
+    return np.trapezoid(p[mask], f[mask]) if mask.sum() > 1 else 0.0
+
+
+def extract_features(epoch_signals, sfreq=SFREQ, window_sec=WINDOW_SEC):
+    """
+    Estrae le 6 feature della shortlist neurale da un'epoca.
+
+    epoch_signals: dict {"AF7": array_1d, "AF8": array_1d}
+                   (gli unici due canali usati dalle 6 feature)
+    Ritorna: dict con le 6 feature, chiavi = FEATURE_NAMES
+
+    Questa è l'UNICA implementazione della logica di estrazione:
+    usata sia dal batch (main() qui sotto, su tutto il dataset) sia
+    da prediction.py (in tempo reale, su un'epoca dallo stream).
+    """
+    psd_af7 = nk.signal_psd(epoch_signals["AF7"], sampling_rate=sfreq,
+                            method="welch", show=False, window=window_sec)
+    psd_af8 = nk.signal_psd(epoch_signals["AF8"], sampling_rate=sfreq,
+                            method="welch", show=False, window=window_sec)
+
+    p_total_af7 = band_power(psd_af7, 1.0, 40.0)
+    p_total_af8 = band_power(psd_af8, 1.0, 40.0)
+
+    # Theta AF7 (4-8 Hz) — coerente su 4/4 soggetti, d medio pesato = 0.93
+    p_theta_af7 = band_power(psd_af7, 4.0, 8.0)
+    abs_theta_af7 = p_theta_af7
+    rel_theta_af7 = p_theta_af7 / p_total_af7 if p_total_af7 > 0 else 0.0
+
+    # Alpha AF8 (8-13 Hz) — soppressione alpha, feature più discriminante
+    # d = 1.93 (Rel) e 1.38 (Abs), coerente 4/4
+    p_alpha_af8 = band_power(psd_af8, 8.0, 13.0)
+    abs_alpha_af8 = p_alpha_af8
+    rel_alpha_af8 = p_alpha_af8 / p_total_af8 if p_total_af8 > 0 else 0.0
+
+    # Theta AF8 (4-8 Hz) — d = 1.13, coerente 4/4
+    p_theta_af8 = band_power(psd_af8, 4.0, 8.0)
+    abs_theta_af8 = p_theta_af8
+
+    # FAA = log(alpha_AF8) - log(alpha_AF7) — d = 1.50, coerente 4/4
+    p_alpha_af7 = band_power(psd_af7, 8.0, 13.0)
+    faa = (np.log(p_alpha_af8) - np.log(p_alpha_af7)
+           if p_alpha_af8 > 0 and p_alpha_af7 > 0 else 0.0)
+
+    return {
+        "Abs_Theta_AF7": abs_theta_af7,
+        "Rel_Theta_AF7": rel_theta_af7,
+        "Abs_Alpha_AF8": abs_alpha_af8,
+        "Rel_Alpha_AF8": rel_alpha_af8,
+        "Abs_Theta_AF8": abs_theta_af8,
+        "FAA":           faa,
+    }
+
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Sanity check PSD medio
@@ -137,65 +203,18 @@ def main():
             "label":    label,
         }
 
-        # Calcola PSD una volta per canale; riusa per feature e sanity check
-        psd_cache = {}
+        # PSD per il sanity check (tutti e 4 i canali, media per soggetto/stato)
         for ch in CHANNELS:
             sig    = epoch_data[ch].values
             psd_df = nk.signal_psd(sig, sampling_rate=SFREQ, method="welch",
                                    show=False, window=WINDOW_SEC)
-            psd_cache[ch] = psd_df
             psd_accum[(subject, label)][ch].append(
                 psd_df.set_index("Frequency")["Power"]
             )
 
-        # ── Helper: integra la PSD su una banda [lo, hi) Hz ──────────────────
-        def band_power(ch, lo, hi):
-            psd = psd_cache[ch]
-            f   = psd["Frequency"].values
-            p   = psd["Power"].values
-            mask = (f >= lo) & (f < hi)
-            return np.trapezoid(p[mask], f[mask]) if mask.sum() > 1 else 0.0
-
-        # ── Banda di riferimento per le feature relative ──────────────────────
-        # p_total calcolato su 1-40 Hz (l'intera banda dopo il band-pass).
-        # Usato solo per AF7 e AF8 (canali frontali, quelli delle feature scelte).
-
-        p_total_af7 = band_power("AF7", 1.0, 40.0)
-        p_total_af8 = band_power("AF8", 1.0, 40.0)
-
-        # ── Theta AF7 (4-8 Hz) ───────────────────────────────────────────────
-        # Theta frontale sinistro: correlato al carico cognitivo e alla
-        # working memory. Coerente su 4/4 soggetti, d medio pesato = 0.93.
-        p_theta_af7 = band_power("AF7", 4.0, 8.0)
-        epoch_features["Abs_Theta_AF7"] = p_theta_af7
-        epoch_features["Rel_Theta_AF7"] = p_theta_af7 / p_total_af7 if p_total_af7 > 0 else 0.0
-
-        # ── Alpha AF8 (8-13 Hz) ──────────────────────────────────────────────
-        # Soppressione alpha frontale destra durante concentrazione.
-        # Feature più discriminante del set: d = 1.93 (Rel) e 1.38 (Abs).
-        # Meccanismo: desincronizzazione alpha = corteccia frontale attiva.
-        p_alpha_af8 = band_power("AF8", 8.0, 13.0)
-        epoch_features["Abs_Alpha_AF8"] = p_alpha_af8
-        epoch_features["Rel_Alpha_AF8"] = p_alpha_af8 / p_total_af8 if p_total_af8 > 0 else 0.0
-
-        # ── Theta AF8 (4-8 Hz) ───────────────────────────────────────────────
-        # Theta frontale destro: stessa dinamica cognitiva di AF7 ma sull'altro
-        # emisfero. d = 1.13, coerente 4/4.
-        p_theta_af8 = band_power("AF8", 4.0, 8.0)
-        epoch_features["Abs_Theta_AF8"] = p_theta_af8
-
-        # ── FAA — Frontal Alpha Asymmetry ─────────────────────────────────────
-        # FAA = log(alpha_AF8) - log(alpha_AF7).
-        # Cattura l'asimmetria emisferico-frontale dell'alpha; in letteratura
-        # FAA > 0 è associata a stati di approach motivation e attenzione
-        # focalizzata. d = 1.50, coerente 4/4.
-        # Nota: serve l'alpha di AF7 solo per FAA; non la salviamo come feature
-        # separata perché il suo d (0.28) non è sufficiente da solo.
-        p_alpha_af7 = band_power("AF7", 8.0, 13.0)
-        epoch_features["FAA"] = (
-            np.log(p_alpha_af8) - np.log(p_alpha_af7)
-            if p_alpha_af8 > 0 and p_alpha_af7 > 0 else 0.0
-        )
+        # Le 6 feature della shortlist — stessa funzione usata da prediction.py
+        epoch_signals = {ch: epoch_data[ch].values for ch in ["AF7", "AF8"]}
+        epoch_features.update(extract_features(epoch_signals))
 
         features_list.append(epoch_features)
 

@@ -3,30 +3,34 @@ Training Pipeline — SVM + LDA + LightGBM
 -----------------------------------------
 Modelli scelti in base alle caratteristiche del dataset:
   - 6 feature, ~450 epoche, 3 soggetti (subjectc escluso)
-  - separazione emersa lineare dalla GridSearch precedente
+  - separazione emersa lineare dal confronto SVM/LogReg precedente
   - dataset sbilanciato (~1.7:1 neutral/concentrating)
 
-SVM  : riferimento solido, kernel lineare/rbf, gestisce sbilanciamento
-       con class_weight='balanced'. GridSearch su C e kernel.
+SVM  : riferimento principale. Kernel lineare/rbf, class_weight='balanced'.
+       GridSearch su C e kernel.
 
 LDA  : Linear Discriminant Analysis — ideale per separazione lineare
-       con pochi campioni. Stabile, nessun rischio overfitting.
-       GridSearch su solver e shrinkage (regolarizzazione Ledoit-Wolf).
-       Se LDA ≈ SVM → la separazione è davvero lineare (conferma).
+       con pochi campioni. GridSearch su solver e shrinkage
+       (regolarizzazione Ledoit-Wolf). Se LDA ≈ SVM → conferma che
+       la separazione è davvero lineare.
 
-LightGBM : Gradient Boosting sequenziale — corregge errori iterativamente,
-           robusto su dataset piccoli con feature continue.
-           Migliore di Random Forest su pochi dati perché non crea alberi
-           profondi indipendenti. GridSearch su n_estimators, learning_rate,
-           max_depth, min_child_samples (soglia minima per foglia — cruciale
-           con dataset piccoli per evitare overfitting).
+LightGBM : Gradient Boosting sequenziale — corregge errori iterativamente.
+       Può catturare interazioni non lineari tra feature che un modello
+       lineare non vede. GridSearch su n_estimators, learning_rate,
+       max_depth, min_child_samples (alto per evitare overfitting su
+       dataset piccolo).
 
 Protocollo valutazione: LOSO (Leave-One-Subject-Out)
-  - addestra su 2 soggetti, valuta sul terzo
-  - ripete per ogni soggetto → 3 fold
+  - addestra su 2 soggetti, valuta sul terzo, ripete per ogni soggetto (3 fold)
   - iperparametri scelti con GridSearch sulla stessa LOSO
   - nota: bias ottimistico lieve (iperparametri vedono i soggetti di test)
     ma identico per tutti i modelli → il confronto è equo
+
+Modello finale (per prediction.py): per ciascun modello, dopo la LOSO,
+  riaddestra con i best_params su TUTTI i dati (a+b+d, nessun fold escluso)
+  e salva come model_final.pkl. La LOSO resta la stima di generalizzazione;
+  il modello finale è quello "di produzione" — ha visto tutto ciò che
+  sappiamo, ed è quello che prediction.py caricherà per un'epoca nuova.
 
 subjectc escluso: elettrodo frontale compromesso in tutte le sessioni
   (AF7 rotta in concentrating, AF8 rotta in neutral) — documentato
@@ -36,7 +40,12 @@ subjectc escluso: elettrodo frontale compromesso in tutte le sessioni
 import pandas as pd
 import numpy as np
 import os
+import warnings
 import joblib
+
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=UserWarning, module="sklearn")
+
 from sklearn.base import clone
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -171,7 +180,8 @@ def train_supervised(name, pipeline, param_grid, X, y, groups):
                  fold_results, g_acc, g_f1, cm, cr)
 
     return {"name": name, "acc": g_acc, "f1": g_f1,
-            "best_params": grid.best_params_, "folds": fold_results}
+            "best_params": grid.best_params_, "folds": fold_results,
+            "pipeline": pipeline}
 
 
 def _save_report(name, out_dir, best_params, gs_score,
@@ -191,6 +201,32 @@ def _save_report(name, out_dir, best_params, gs_score,
         f.write(f"F1       : {g_f1*100:.1f}%\n\n")
         f.write("Confusion Matrix:\n" + str(cm) + "\n\n")
         f.write("Classification Report:\n" + cr)
+
+
+def train_final_model(name, pipeline, best_params, X, y):
+    """
+    Addestra il modello "di produzione" su TUTTI i dati disponibili
+    (nessun fold escluso), usando i best_params trovati dalla GridSearch.
+
+    Questo NON è un modello di validazione — la sua performance non si
+    misura di nuovo (la stima è già la LOSO). È il modello che
+    prediction.py caricherà per classificare un'epoca nuova: ha visto
+    tutti i soggetti disponibili (a+b+d), quindi è il più informato
+    possibile.
+    """
+    model = clone(pipeline)
+    model.set_params(**best_params)
+    model.fit(X, y)
+
+    out_dir = os.path.join(MODEL_BASE_DIR, name)
+    os.makedirs(out_dir, exist_ok=True)
+    pkl = os.path.join(out_dir, "model_final.pkl")
+    joblib.dump(model, pkl)
+
+    print(f"  [{name.upper()}] modello finale addestrato su {len(y)} campioni "
+          f"({int((y==0).sum())} neutral / {int((y==1).sum())} concentrating) "
+          f"→ {os.path.basename(pkl)}")
+    return pkl
 
 
 def print_comparative_report(results):
@@ -265,13 +301,9 @@ def main():
 
     # ── LDA ──────────────────────────────────────────────────
     # Linear Discriminant Analysis.
-    # solver='svd': non inverte la matrice di covarianza direttamente,
-    #   più stabile numericamente con pochi campioni.
-    # shrinkage='auto': usa la stima di Ledoit-Wolf per regolarizzare
-    #   la matrice di covarianza — fondamentale quando n_samples è vicino
-    #   a n_features (qui 450 epoche, 6 feature: non critico ma buona pratica).
-    #   Con shrinkage='auto' è richiesto solver='lsqr' o 'eigen'.
-    # Confronto: se LDA ≈ SVM → separazione è davvero lineare.
+    # shrinkage='auto' usa la stima di Ledoit-Wolf per regolarizzare
+    #   la matrice di covarianza — richiede solver 'lsqr' o 'eigen'.
+    # Confronto: se LDA ≈ SVM lineare → separazione è davvero lineare.
     lda_pipeline = Pipeline([
         ("scaler", StandardScaler()),
         ("clf", LinearDiscriminantAnalysis())
@@ -285,33 +317,36 @@ def main():
     # ── LightGBM ─────────────────────────────────────────────
     # Gradient Boosting sequenziale — costruisce alberi in sequenza
     # correggendo gli errori del modello precedente.
-    # n_estimators: numero di alberi. Con dataset piccolo tenerlo basso
-    #   (100-300) per evitare overfitting.
-    # learning_rate: passo di correzione. Basso = più stabile ma più alberi.
-    #   Accoppiato a n_estimators: lr basso + molti alberi vs lr alto + pochi.
-    # max_depth: profondità massima di ogni albero. Con 6 feature, 3-5 è
-    #   sufficiente — alberi profondi overfittano.
-    # min_child_samples: numero minimo di campioni per creare una foglia.
-    #   Cruciale con dataset piccolo: valori alti (20-50) prevengono
-    #   foglie con pochi campioni che memorizzano il training.
+    # n_estimators: numero di alberi (basso per evitare overfitting).
+    # learning_rate: passo di correzione, accoppiato a n_estimators.
+    # max_depth: profondità massima — con 6 feature, 3-5 è sufficiente.
+    # min_child_samples: minimo campioni per foglia — alto previene
+    #   foglie che memorizzano poche epoche del training.
     # class_weight='balanced': compensa lo sbilanciamento.
     lgbm_pipeline = Pipeline([
         ("scaler", StandardScaler()),
-        ("clf", LGBMClassifier(
-            class_weight="balanced",
-            random_state=42,
-            verbose=-1       # silenzia i log di LightGBM
-        ))
+        ("clf", LGBMClassifier(class_weight="balanced",
+                                random_state=42, verbose=-1))
     ])
     lgbm_grid = {
-        "clf__n_estimators":     [100, 200, 300],
-        "clf__learning_rate":    [0.01, 0.05, 0.1],
-        "clf__max_depth":        [3, 5],
-        "clf__min_child_samples":[10, 20, 40],
+        "clf__n_estimators":      [100, 200, 300],
+        "clf__learning_rate":     [0.01, 0.05, 0.1],
+        "clf__max_depth":         [3, 5],
+        "clf__min_child_samples": [10, 20, 40],
     }
     results.append(train_supervised("lgbm", lgbm_pipeline, lgbm_grid, X, y, groups))
 
     print_comparative_report(results)
+
+    # ── Modello finale (produzione) ───────────────────────────
+    # Riaddestra ciascun modello con i best_params su TUTTI i dati
+    # (a+b+d, nessun fold escluso). La performance è già stimata dalla
+    # LOSO sopra — questo è il modello che prediction.py userà.
+    print(f"\n{'='*57}")
+    print("  MODELLO FINALE (su tutti i dati, per prediction.py)")
+    print(f"{'='*57}")
+    for r in results:
+        train_final_model(r["name"], r["pipeline"], r["best_params"], X, y)
 
 
 if __name__ == "__main__":
