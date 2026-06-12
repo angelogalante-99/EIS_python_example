@@ -36,7 +36,7 @@ sys.path.insert(0, os.path.join(ROOT, "src", "features"))
 
 import streaming                                   # src/ml/streaming.py
 import prediction                                  # src/ml/prediction.py
-from Preprocessing import preprocess_epoch         # src/Preprocessing/preprocessing.py
+from preprocessing import preprocess_epoch         # src/Preprocessing/preprocessing.py
 from features_extraction import extract_features, FEATURE_NAMES  # src/features/features_extraction.py
 
 import replay_real   # generatore epoche reali per la demo (in root)

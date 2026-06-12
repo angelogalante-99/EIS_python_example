@@ -2,6 +2,9 @@
 <module type="PYTHON_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src/Preprocessing" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/features" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/ml" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.13 (Neurofeedback)" jdkType="Python SDK" />
